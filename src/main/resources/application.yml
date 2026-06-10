@@ -1,0 +1,40 @@
+server:
+  port: ${PORT:8080}
+
+spring:
+  config:
+    import: optional:file:./application-local.yml
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/postgres}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    show-sql: ${JPA_SHOW_SQL:false}
+    hibernate:
+      ddl-auto: none
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+
+springdoc:
+  show-hateoas: false
+  swagger-ui:
+    path: /docs
+    operationsSorter: method
+    disable-swagger-default-url: true
+
+app:
+  cors:
+    allowed-origin-patterns: ${CORS_ALLOWED_ORIGIN_PATTERNS:http://localhost:3000,http://127.0.0.1:3000,https://*.vercel.app,https://*.ngrok.io,https://*.ngrok-free.app}
+  football-api:
+    url: https://v3.football.api-sports.io
+    key: ${FOOTBALL_API_KEY:}
+  jwt:
+    secret: ${JWT_SECRET:super-secret-key-for-bolao-jwt-must-be-at-least-256-bits-long-for-hs256}
+    expiration: 86400000
+
+supabase:
+  url: ${SUPABASE_URL:}
+  anon-key: ${SUPABASE_ANON_KEY:}
+  jwt-secret: ${SUPABASE_JWT_SECRET:}
