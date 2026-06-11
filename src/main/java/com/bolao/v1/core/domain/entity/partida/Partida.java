@@ -43,12 +43,28 @@ public class Partida {
         }
 
         this.status = String.valueOf(StatusPartida.EM_ANDAMENTO);
+
+        if (this.golsCasa == null) {
+            this.golsCasa = 0;
+        }
+        if (this.golsVisitante == null) {
+            this.golsVisitante = 0;
+        }
     }
 
     public void atualizarPlacarAoVivo(Integer golsCasa, Integer golsVisitante) {
         if (String.valueOf(StatusPartida.FINALIZADA).equals(this.status)
                 || String.valueOf(StatusPartida.CANCELADA).equals(this.status)) {
             return;
+        }
+
+        if (String.valueOf(StatusPartida.EM_ANDAMENTO).equals(this.status)) {
+            if (this.golsCasa == null) {
+                this.golsCasa = 0;
+            }
+            if (this.golsVisitante == null) {
+                this.golsVisitante = 0;
+            }
         }
 
         if (golsCasa != null) {

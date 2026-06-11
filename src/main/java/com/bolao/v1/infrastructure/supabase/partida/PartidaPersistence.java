@@ -58,13 +58,14 @@ public class PartidaPersistence implements PartidaRepositoryPortOut {
 
 
     @Override
-    public Partida save (Partida entity) {
-
-        PartidaEntity jpaEntity = mapper.map(entity, PartidaEntity.class);
+    public Partida save(Partida partida) {
+        PartidaEntity jpaEntity = mapper.map(partida, PartidaEntity.class);
+        if (partida.getStatus() != null && !partida.getStatus().isBlank()) {
+            jpaEntity.setStatus(Partida.StatusPartida.valueOf(partida.getStatus().trim()));
+        }
 
         PartidaEntity saved = repository.save(jpaEntity);
-
-        return mapper.map(saved, Partida.class);
+        return toDomainWithLogos(saved);
 
 
 
@@ -106,14 +107,14 @@ public class PartidaPersistence implements PartidaRepositoryPortOut {
     @Override
     public List<Partida> findByStatus(Partida.StatusPartida status) {
         return repository.findByStatus(status).stream()
-                .map(entity -> mapper.map(entity, Partida.class))
+                .map(this::toDomainWithLogos)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<Partida> findPartidasDeHoje(Instant inicio, Instant fim) {
         return repository.findByDataHoraPartidaBetween(inicio, fim).stream()
-                .map(entity -> mapper.map(entity, Partida.class))
+                .map(this::toDomainWithLogos)
                 .collect(Collectors.toList());
     }
 

@@ -141,7 +141,8 @@ public class PartidaService implements PartidaPortIn {
 
         switch (apiCategory) {
             case IN_PLAY -> {
-                if (String.valueOf(Partida.StatusPartida.AGENDADA).equals(partida.getStatus())) {
+                if (partida.getStatus() == null
+                        || String.valueOf(Partida.StatusPartida.AGENDADA).equals(partida.getStatus())) {
                     partida.iniciarPartida();
                     log.info("Partida ID {} mudou para EM_ANDAMENTO (API: {}).", partida.getId(), dadosExternos.getStatusShort());
                 }
@@ -172,8 +173,15 @@ public class PartidaService implements PartidaPortIn {
                     partida.getId(), dadosExternos.getStatusShort(), partida.getStatus()
             );
             case SCHEDULED -> {
-                // NS/TBD: no local status change; optional live score refresh if API already published goals
                 if (placarCasa != null || placarVisitante != null) {
+                    if (partida.getStatus() == null
+                            || String.valueOf(Partida.StatusPartida.AGENDADA).equals(partida.getStatus())) {
+                        partida.iniciarPartida();
+                        log.info(
+                                "Partida ID {} inferida EM_ANDAMENTO (API '{}' com placar publicado).",
+                                partida.getId(), dadosExternos.getStatusShort()
+                        );
+                    }
                     partida.atualizarPlacarAoVivo(placarCasa, placarVisitante);
                     partidaPortOut.save(partida);
                 }
