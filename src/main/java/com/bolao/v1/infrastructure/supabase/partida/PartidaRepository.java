@@ -13,9 +13,21 @@ import java.util.List;
 public interface PartidaRepository extends JpaRepository<PartidaEntity, Integer> {
     List<PartidaEntity> findByFaseIdAndCampeonatoId(Integer faseId, Integer campeonatoId);
 
-    List<PartidaEntity> findByStatus(Partida.StatusPartida status);
+    @org.springframework.data.jpa.repository.Query("""
+            SELECT p FROM PartidaEntity p
+            LEFT JOIN FETCH p.timeCasa
+            LEFT JOIN FETCH p.timeVisitante
+            WHERE p.status = :status
+            """)
+    List<PartidaEntity> findByStatusWithTimes(Partida.StatusPartida status);
 
-    List<PartidaEntity> findByDataHoraPartidaBetween(Instant inicio, Instant fim);
+    @org.springframework.data.jpa.repository.Query("""
+            SELECT p FROM PartidaEntity p
+            LEFT JOIN FETCH p.timeCasa
+            LEFT JOIN FETCH p.timeVisitante
+            WHERE p.dataHoraPartida BETWEEN :inicio AND :fim
+            """)
+    List<PartidaEntity> findByDataHoraPartidaBetweenWithTimes(Instant inicio, Instant fim);
 
     @org.springframework.data.jpa.repository.Query("SELECT p FROM PartidaEntity p LEFT JOIN FETCH p.timeCasa LEFT JOIN FETCH p.timeVisitante")
     List<PartidaEntity> findAllWithTimes();

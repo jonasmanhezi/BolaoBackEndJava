@@ -44,7 +44,7 @@ public interface PalpiteController {
             @Parameter(hidden = true) @AuthenticatedGrupoId Long grupoId,
             @RequestBody @Valid PalpiteUpdateRequestDto request);
 
-    @Operation(summary = "Lista os palpites do usuário logado filtrados por Campeonato e Fase")
+    @Operation(summary = "Lista os palpites do usuário logado no grupo (campeonato/fase na URL são ignorados)")
     @ApiResponse(responseCode = "200", description = "Lista de palpites retornada com sucesso")
     @ApiResponse(responseCode = "401", description = "Token JWT ausente ou inválido")
     @GetMapping("/campeonato/{campeonatoId}/fase/{faseId}")
@@ -54,7 +54,7 @@ public interface PalpiteController {
             @Parameter(hidden = true) @AuthenticatedUserId Integer userId,
             @Parameter(hidden = true) @AuthenticatedGrupoId Long grupoId);
 
-    @Operation(summary = "Lista palpites paginados de um usuário por Campeonato e Fase")
+    @Operation(summary = "Lista palpites paginados do usuário no grupo (campeonato/fase na URL são ignorados)")
     @ApiResponse(responseCode = "200", description = "Página de palpites retornada com sucesso")
     @ApiResponse(responseCode = "401", description = "Token JWT ausente ou inválido")
     @ApiResponse(responseCode = "403", description = "usuarioId da URL deve ser igual ao userId retornado no login")

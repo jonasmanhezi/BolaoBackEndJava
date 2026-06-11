@@ -68,19 +68,22 @@ public class PalpitePersistence implements PalpiteRepositoryPortOut {
     }
 
     @Override
-    public Page<Palpite> findByUsuarioIdAndGrupoIdAndCampeonatoIdAndFaseIdPaged(
+    public List<Palpite> findByUsuarioIdAndGrupoId(Integer usuarioId, Long grupoId) {
+        return repository.findByUsuarioIdAndGrupoIdOrderByIdAsc(usuarioId, grupoId).stream()
+                .map(entity -> modelMapper.map(entity, Palpite.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<Palpite> findByUsuarioIdAndGrupoIdPaged(
             Integer usuarioId,
             Long grupoId,
-            Integer campeonatoId,
-            Integer faseId,
             int page,
             int size
     ) {
         PageRequest pageRequest = PageRequest.of(page, size);
         return repository
-                .findByUsuarioIdAndGrupoIdAndCampeonatoIdAndFaseId(
-                        usuarioId, grupoId, campeonatoId, faseId, pageRequest
-                )
+                .findByUsuarioIdAndGrupoIdOrderByIdAsc(usuarioId, grupoId, pageRequest)
                 .map(entity -> modelMapper.map(entity, Palpite.class));
     }
 }

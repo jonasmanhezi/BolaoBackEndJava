@@ -65,14 +65,16 @@ public class PartidaPersistence implements PartidaRepositoryPortOut {
         }
 
         PartidaEntity saved = repository.save(jpaEntity);
-        return toDomainWithLogos(saved);
+        return repository.findByIdWithTimes(saved.getId())
+                .map(this::toDomainWithLogos)
+                .orElseGet(() -> toDomainBasic(saved));
 
 
 
 
     }
 
-    private Partida toDomainWithLogos(PartidaEntity entity) {
+    private Partida toDomainBasic(PartidaEntity entity) {
         Partida partida = new Partida();
         partida.setId(entity.getId());
         partida.setCampeonatoId(entity.getCampeonatoId());
@@ -84,6 +86,11 @@ public class PartidaPersistence implements PartidaRepositoryPortOut {
         partida.setGolsVisitante(entity.getGolsVisitante());
         partida.setStatus(entity.getStatus() != null ? entity.getStatus().name() : null);
         partida.setExternalId(entity.getExternalId());
+        return partida;
+    }
+
+    private Partida toDomainWithLogos(PartidaEntity entity) {
+        Partida partida = toDomainBasic(entity);
 
         if (entity.getTimeCasa() != null) {
             partida.setNomeCasa(entity.getTimeCasa().getNome());
@@ -106,14 +113,14 @@ public class PartidaPersistence implements PartidaRepositoryPortOut {
 
     @Override
     public List<Partida> findByStatus(Partida.StatusPartida status) {
-        return repository.findByStatus(status).stream()
+        return repository.findByStatusWithTimes(status).stream()
                 .map(this::toDomainWithLogos)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<Partida> findPartidasDeHoje(Instant inicio, Instant fim) {
-        return repository.findByDataHoraPartidaBetween(inicio, fim).stream()
+        return repository.findByDataHoraPartidaBetweenWithTimes(inicio, fim).stream()
                 .map(this::toDomainWithLogos)
                 .collect(Collectors.toList());
     }

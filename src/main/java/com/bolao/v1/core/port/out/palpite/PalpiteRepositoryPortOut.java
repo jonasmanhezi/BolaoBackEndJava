@@ -22,11 +22,11 @@ public interface PalpiteRepositoryPortOut {
 
     boolean existsByPartidaIdAndUsuarioIdAndGrupoId(Integer partidaId, Integer usuarioId, Long grupoId);
 
-    Page<Palpite> findByUsuarioIdAndGrupoIdAndCampeonatoIdAndFaseIdPaged(
+    List<Palpite> findByUsuarioIdAndGrupoId(Integer usuarioId, Long grupoId);
+
+    Page<Palpite> findByUsuarioIdAndGrupoIdPaged(
             Integer usuarioId,
             Long grupoId,
-            Integer campeonatoId,
-            Integer faseId,
             int page,
             int size
     );

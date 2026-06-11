@@ -23,6 +23,14 @@ public interface PalpiteRepository extends JpaRepository<PalpiteEntity, Integer>
 
     boolean existsByPartidaIdAndUsuarioIdAndGrupoId(Integer partidaId, Integer usuarioId, Long grupoId);
 
+    List<PalpiteEntity> findByUsuarioIdAndGrupoIdOrderByIdAsc(Integer usuarioId, Long grupoId);
+
+    Page<PalpiteEntity> findByUsuarioIdAndGrupoIdOrderByIdAsc(
+            Integer usuarioId,
+            Long grupoId,
+            Pageable pageable
+    );
+
     @Query("""
             SELECT p FROM PalpiteEntity p, PartidaEntity pt
             WHERE p.partidaId = pt.id

@@ -88,23 +88,11 @@ public class PalpiteService implements PalpitePortIn {
             Long grupoId
     ) {
         log.info(
-                "Buscando palpites do usuário {} no grupo {} para campeonato {} e fase {}",
+                "Buscando palpites do usuário {} no grupo {} (campeonato {} e fase {} ignorados)",
                 userIdDoToken, grupoId, campeonatoId, faseId
         );
 
-        List<Partida> partidas = partidaRepositoryPortOut.findByCampeonatoIdAndFaseId(campeonatoId, faseId);
-
-        if (partidas.isEmpty()) {
-            return List.of();
-        }
-
-        List<Integer> partidaIds = partidas.stream()
-                .map(Partida::getId)
-                .collect(Collectors.toList());
-
-        return palpiteRepositoryPortOut.findByPartidaIdInAndUsuarioIdAndGrupoId(
-                partidaIds, userIdDoToken, grupoId
-        );
+        return palpiteRepositoryPortOut.findByUsuarioIdAndGrupoId(userIdDoToken, grupoId);
     }
 
     @Override
@@ -123,12 +111,12 @@ public class PalpiteService implements PalpitePortIn {
         }
 
         log.info(
-                "Buscando palpites paginados do usuário {} no grupo {} para campeonato {} e fase {} (page={}, size={})",
+                "Buscando palpites paginados do usuário {} no grupo {} (campeonato {} e fase {} ignorados, page={}, size={})",
                 usuarioId, grupoId, campeonatoId, faseId, page, size
         );
 
-        Page<Palpite> resultPage = palpiteRepositoryPortOut.findByUsuarioIdAndGrupoIdAndCampeonatoIdAndFaseIdPaged(
-                usuarioId, grupoId, campeonatoId, faseId, page, size
+        Page<Palpite> resultPage = palpiteRepositoryPortOut.findByUsuarioIdAndGrupoIdPaged(
+                usuarioId, grupoId, page, size
         );
 
         List<PalpiteResponseDto> content = resultPage.getContent().stream()

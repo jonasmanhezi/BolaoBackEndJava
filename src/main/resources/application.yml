@@ -34,6 +34,11 @@ app:
   football-api:
     url: https://v3.football.api-sports.io
     key: ${FOOTBALL_API_KEY:}
+    connect-timeout-ms: ${FOOTBALL_API_CONNECT_TIMEOUT_MS:10000}
+    read-timeout-ms: ${FOOTBALL_API_READ_TIMEOUT_MS:15000}
+    retry-max-attempts: ${FOOTBALL_API_RETRY_MAX_ATTEMPTS:3}
+    retry-delay-ms: ${FOOTBALL_API_RETRY_DELAY_MS:1500}
+    request-delay-ms: ${FOOTBALL_API_REQUEST_DELAY_MS:400}
   jwt:
     secret: ${JWT_SECRET:super-secret-key-for-bolao-jwt-must-be-at-least-256-bits-long-for-hs256}
     expiration: 86400000

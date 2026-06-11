@@ -15,6 +15,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +33,9 @@ public class PartidaService implements PartidaPortIn {
     private final PartidaRepositoryPortOut partidaPortOut;
     private final ModelMapper modelMapper;
     private final PartidaExternaPortOut partidaExternaPortOut;
+
+    @Value("${app.football-api.request-delay-ms:400}")
+    private long footballApiRequestDelayMs;
 
     @Override
     public List<PartidaResponseDto> findAll() {
@@ -108,10 +112,16 @@ public class PartidaService implements PartidaPortIn {
             return;
         }
 
+        boolean primeiraPartida = true;
         for (Partida partida : partidasParaAtualizar) {
             if (partida.getExternalId() == null) {
                 continue;
             }
+
+            if (!primeiraPartida) {
+                aguardarEntreRequisicoesApi();
+            }
+            primeiraPartida = false;
 
             try {
                 PartidaExternaDto dadosExternos = partidaExternaPortOut
@@ -130,8 +140,26 @@ public class PartidaService implements PartidaPortIn {
                 aplicarDadosExternos(partida, dadosExternos, apiCategory);
 
             } catch (Exception e) {
-                log.error("Falha ao sincronizar dados externos da partida local ID: {}. Erro: {}", partida.getId(), e.getMessage());
+                log.error(
+                        "Falha ao sincronizar partida local ID {} (externalId={}). "
+                                + "Partida mantida com dados atuais; nova tentativa no próximo job. Erro: {}",
+                        partida.getId(),
+                        partida.getExternalId(),
+                        e.getMessage()
+                );
             }
+        }
+    }
+
+    private void aguardarEntreRequisicoesApi() {
+        if (footballApiRequestDelayMs <= 0) {
+            return;
+        }
+        try {
+            Thread.sleep(footballApiRequestDelayMs);
+        } catch (InterruptedException interrupted) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Sincronização de partidas interrompida", interrupted);
         }
     }
 
