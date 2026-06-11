@@ -3,6 +3,7 @@ package com.bolao.v1.core.application.service.ranking;
 import com.bolao.v1.core.domain.entity.ranking.Ranking;
 import com.bolao.v1.core.port.in.RankingPortIn;
 import com.bolao.v1.core.port.in.dto.response.ranking.RankingResponseDto;
+import com.bolao.v1.core.port.out.grupo.GrupoRepositoryPortOut;
 import com.bolao.v1.core.port.out.palpite.PalpiteRepositoryPortOut;
 import com.bolao.v1.core.port.out.palpite.UsuarioPontuacaoAggregate;
 import com.bolao.v1.core.port.out.ranking.RankingComNome;
@@ -23,14 +24,30 @@ public class RankingService implements RankingPortIn {
 
     private final PalpiteRepositoryPortOut palpiteRepositoryPortOut;
     private final RankingRepositoryPortOut rankingRepositoryPortOut;
+    private final GrupoRepositoryPortOut grupoRepositoryPortOut;
 
     @Override
     @Transactional
     public void atualizarRanking() {
-        log.info("Iniciando atualização do ranking a partir de palpites em partidas finalizadas");
+        List<Long> grupoIds = grupoRepositoryPortOut.findAllIds();
+
+        if (grupoIds.isEmpty()) {
+            log.info("Nenhum grupo cadastrado para atualizar ranking.");
+            return;
+        }
+
+        for (Long grupoId : grupoIds) {
+            atualizarRankingDoGrupo(grupoId);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void atualizarRankingDoGrupo(Long grupoId) {
+        log.info("Atualizando ranking do grupo {}", grupoId);
 
         List<UsuarioPontuacaoAggregate> totais =
-                palpiteRepositoryPortOut.sumPontuacaoPorUsuarioEmPartidasFinalizadas();
+                palpiteRepositoryPortOut.sumPontuacaoPorUsuarioEmPartidasFinalizadasPorGrupo(grupoId);
 
         List<Long> usuariosComPontuacao = new ArrayList<>();
 
@@ -39,13 +56,14 @@ public class RankingService implements RankingPortIn {
             Integer pontuacao = aggregate.getPontuacaoTotal();
             usuariosComPontuacao.add(userId);
 
-            Ranking ranking = rankingRepositoryPortOut.findByUserId(userId)
+            Ranking ranking = rankingRepositoryPortOut.findByUserIdAndGrupoId(userId, grupoId)
                     .map(existing -> {
                         existing.setPontuacao(pontuacao);
                         return existing;
                     })
                     .orElseGet(() -> Ranking.builder()
                             .userId(userId)
+                            .grupoId(grupoId)
                             .pontuacao(pontuacao)
                             .createdAt(OffsetDateTime.now())
                             .build());
@@ -53,15 +71,14 @@ public class RankingService implements RankingPortIn {
             rankingRepositoryPortOut.save(ranking);
         }
 
-        rankingRepositoryPortOut.deleteByUserIdNotIn(usuariosComPontuacao);
-
-        log.info("Ranking atualizado para {} usuários", usuariosComPontuacao.size());
+        rankingRepositoryPortOut.deleteByGrupoIdAndUserIdNotIn(grupoId, usuariosComPontuacao);
+        log.info("Ranking do grupo {} atualizado para {} usuários", grupoId, usuariosComPontuacao.size());
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<RankingResponseDto> listarRanking() {
-        List<RankingComNome> rankings = rankingRepositoryPortOut.findAllOrdenadoComNome();
+    public List<RankingResponseDto> listarRanking(Long grupoId) {
+        List<RankingComNome> rankings = rankingRepositoryPortOut.findAllOrdenadoComNomeByGrupoId(grupoId);
         List<RankingResponseDto> response = new ArrayList<>();
 
         int posicao = 1;

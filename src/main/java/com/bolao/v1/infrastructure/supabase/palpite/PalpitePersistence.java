@@ -41,18 +41,25 @@ public class PalpitePersistence implements PalpiteRepositoryPortOut {
                 .collect(Collectors.toList());
     }
 
-
-
     @Override
-    public List<Palpite> findByPartidaIdInAndUsuarioId(List<Integer> partidaIds, Integer usuarioId) {
-        return repository.findByPartidaIdInAndUsuarioId(partidaIds, usuarioId).stream()
+    public List<Palpite> findByPartidaIdInAndUsuarioIdAndGrupoId(
+            List<Integer> partidaIds,
+            Integer usuarioId,
+            Long grupoId
+    ) {
+        return repository.findByPartidaIdInAndUsuarioIdAndGrupoId(partidaIds, usuarioId, grupoId).stream()
                 .map(entity -> modelMapper.map(entity, Palpite.class))
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<UsuarioPontuacaoAggregate> sumPontuacaoPorUsuarioEmPartidasFinalizadas() {
-        return repository.sumPontuacaoPorUsuarioEmPartidasFinalizadas().stream()
+    public boolean existsByPartidaIdAndUsuarioIdAndGrupoId(Integer partidaId, Integer usuarioId, Long grupoId) {
+        return repository.existsByPartidaIdAndUsuarioIdAndGrupoId(partidaId, usuarioId, grupoId);
+    }
+
+    @Override
+    public List<UsuarioPontuacaoAggregate> sumPontuacaoPorUsuarioEmPartidasFinalizadasPorGrupo(Long grupoId) {
+        return repository.sumPontuacaoPorUsuarioEmPartidasFinalizadasPorGrupo(grupoId).stream()
                 .map(row -> UsuarioPontuacaoAggregate.builder()
                         .usuarioId(row.getUsuarioId().longValue())
                         .pontuacaoTotal(row.getPontuacaoTotal().intValue())
@@ -61,8 +68,9 @@ public class PalpitePersistence implements PalpiteRepositoryPortOut {
     }
 
     @Override
-    public Page<Palpite> findByUsuarioIdAndCampeonatoIdAndFaseIdPaged(
+    public Page<Palpite> findByUsuarioIdAndGrupoIdAndCampeonatoIdAndFaseIdPaged(
             Integer usuarioId,
+            Long grupoId,
             Integer campeonatoId,
             Integer faseId,
             int page,
@@ -70,7 +78,9 @@ public class PalpitePersistence implements PalpiteRepositoryPortOut {
     ) {
         PageRequest pageRequest = PageRequest.of(page, size);
         return repository
-                .findByUsuarioIdAndCampeonatoIdAndFaseId(usuarioId, campeonatoId, faseId, pageRequest)
+                .findByUsuarioIdAndGrupoIdAndCampeonatoIdAndFaseId(
+                        usuarioId, grupoId, campeonatoId, faseId, pageRequest
+                )
                 .map(entity -> modelMapper.map(entity, Palpite.class));
     }
 }

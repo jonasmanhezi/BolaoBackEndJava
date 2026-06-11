@@ -5,6 +5,7 @@ import com.bolao.v1.core.port.in.dto.request.palpite.PalpiteCreateRequestDto;
 import com.bolao.v1.core.port.in.dto.request.palpite.PalpiteUpdateRequestDto;
 import com.bolao.v1.core.port.in.dto.response.palpite.PaginatedPalpiteResponseDto;
 import com.bolao.v1.core.port.in.dto.response.palpite.PalpiteResponseDto;
+import com.bolao.v1.security.AuthenticatedGrupoId;
 import com.bolao.v1.security.AuthenticatedUserId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -29,6 +30,7 @@ public interface PalpiteController {
     @PostMapping
     ResponseEntity<PalpiteResponseDto> create(
             @Parameter(hidden = true) @AuthenticatedUserId Integer userId,
+            @Parameter(hidden = true) @AuthenticatedGrupoId Long grupoId,
             @RequestBody @Valid PalpiteCreateRequestDto request);
 
     @Operation(summary = "Atualiza o placar de um palpite existente")
@@ -39,6 +41,7 @@ public interface PalpiteController {
     ResponseEntity<PalpiteResponseDto> atualizarPalpite(
             @PathVariable Integer id,
             @Parameter(hidden = true) @AuthenticatedUserId Integer userId,
+            @Parameter(hidden = true) @AuthenticatedGrupoId Long grupoId,
             @RequestBody @Valid PalpiteUpdateRequestDto request);
 
     @Operation(summary = "Lista os palpites do usuário logado filtrados por Campeonato e Fase")
@@ -48,7 +51,8 @@ public interface PalpiteController {
     ResponseEntity<List<PalpiteResponseDto>> findByCampeonatoIdFaseId(
             @PathVariable Integer campeonatoId,
             @PathVariable Integer faseId,
-            @Parameter(hidden = true) @AuthenticatedUserId Integer userId);
+            @Parameter(hidden = true) @AuthenticatedUserId Integer userId,
+            @Parameter(hidden = true) @AuthenticatedGrupoId Long grupoId);
 
     @Operation(summary = "Lista palpites paginados de um usuário por Campeonato e Fase")
     @ApiResponse(responseCode = "200", description = "Página de palpites retornada com sucesso")
@@ -60,6 +64,7 @@ public interface PalpiteController {
             @PathVariable Integer campeonatoId,
             @PathVariable Integer faseId,
             @Parameter(hidden = true) @AuthenticatedUserId Integer userId,
+            @Parameter(hidden = true) @AuthenticatedGrupoId Long grupoId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size);
 

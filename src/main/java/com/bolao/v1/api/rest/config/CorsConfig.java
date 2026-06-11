@@ -34,7 +34,8 @@ public class CorsConfig {
                 "Content-Type",
                 "Accept",
                 "Authorization",
-                "X-Requested-With"
+                "X-Requested-With",
+                "X-Group-Id"
         ));
         config.setAllowCredentials(true);
         config.setMaxAge(3600L);

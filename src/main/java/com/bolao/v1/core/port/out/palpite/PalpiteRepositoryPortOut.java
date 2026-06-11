@@ -8,24 +8,28 @@ import java.util.Optional;
 
 public interface PalpiteRepositoryPortOut {
 
-
     Palpite save(Palpite palpite);
 
     Optional<Palpite> findById(Integer id);
 
-
     List<Palpite> findByPartidaId(Integer partidaId);
 
-    List<Palpite> findByPartidaIdInAndUsuarioId(List<Integer> partidaIds, Integer usuarioId);
-
-    Page<Palpite> findByUsuarioIdAndCampeonatoIdAndFaseIdPaged(
+    List<Palpite> findByPartidaIdInAndUsuarioIdAndGrupoId(
+            List<Integer> partidaIds,
             Integer usuarioId,
+            Long grupoId
+    );
+
+    boolean existsByPartidaIdAndUsuarioIdAndGrupoId(Integer partidaId, Integer usuarioId, Long grupoId);
+
+    Page<Palpite> findByUsuarioIdAndGrupoIdAndCampeonatoIdAndFaseIdPaged(
+            Integer usuarioId,
+            Long grupoId,
             Integer campeonatoId,
             Integer faseId,
             int page,
             int size
     );
 
-    List<UsuarioPontuacaoAggregate> sumPontuacaoPorUsuarioEmPartidasFinalizadas();
-
+    List<UsuarioPontuacaoAggregate> sumPontuacaoPorUsuarioEmPartidasFinalizadasPorGrupo(Long grupoId);
 }

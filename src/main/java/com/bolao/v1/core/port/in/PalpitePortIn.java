@@ -10,18 +10,20 @@ import java.util.List;
 
 public interface PalpitePortIn {
 
-
-
     void pontuarPalpite(Integer partidaId, Integer golsCasaReal, Integer golsVisitanteReal);
 
-
-    Palpite create(Integer userId, PalpiteCreateRequestDto request);
+    Palpite create(Integer userId, Long grupoId, PalpiteCreateRequestDto request);
 
     @Transactional
-    Palpite atualizarPalpite(Integer palpiteId, Integer userId, PalpiteUpdateRequestDto dto);
+    Palpite atualizarPalpite(Integer palpiteId, Integer userId, Long grupoId, PalpiteUpdateRequestDto dto);
 
     @Transactional(readOnly = true)
-    List<Palpite> findByCampeonatoIdFaseId(Integer campeonatoId, Integer faseId, Integer userIdDoToken);
+    List<Palpite> findByCampeonatoIdFaseId(
+            Integer campeonatoId,
+            Integer faseId,
+            Integer userIdDoToken,
+            Long grupoId
+    );
 
     @Transactional(readOnly = true)
     PaginatedPalpiteResponseDto findByUsuarioIdCampeonatoIdFaseIdPaged(
@@ -29,6 +31,7 @@ public interface PalpitePortIn {
             Integer campeonatoId,
             Integer faseId,
             Integer userIdAutenticado,
+            Long grupoId,
             int page,
             int size
     );

@@ -16,6 +16,7 @@ public class Palpite {
 
     private Integer id;
     private Integer usuarioId;
+    private Long grupoId;
     private Integer partidaId;
     private Integer golsCasa;
     private Integer golsVisitante;

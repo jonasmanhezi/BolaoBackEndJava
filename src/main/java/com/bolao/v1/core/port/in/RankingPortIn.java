@@ -10,6 +10,9 @@ public interface RankingPortIn {
     @Transactional
     void atualizarRanking();
 
+    @Transactional
+    void atualizarRankingDoGrupo(Long grupoId);
+
     @Transactional(readOnly = true)
-    List<RankingResponseDto> listarRanking();
+    List<RankingResponseDto> listarRanking(Long grupoId);
 }

@@ -15,6 +15,7 @@ public class Ranking {
 
     private Long id;
     private Long userId;
+    private Long grupoId;
     private Integer pontuacao;
     private OffsetDateTime createdAt;
 }

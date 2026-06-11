@@ -9,12 +9,12 @@ import lombok.NoArgsConstructor;
 import java.time.OffsetDateTime;
 
 @Entity
-@Table(name = "tb_ranking")
+@Table(name = "tb_grupo_membro")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RankingEntity {
+public class GrupoMembroEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,12 +23,9 @@ public class RankingEntity {
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
-    @Column(name = "user_id")
-    private Long userId;
-
     @Column(name = "grupo_id")
     private Long grupoId;
 
-    @Column(name = "pontuacao")
-    private Short pontuacao;
+    @Column(name = "usuario_id")
+    private Long usuarioId;
 }

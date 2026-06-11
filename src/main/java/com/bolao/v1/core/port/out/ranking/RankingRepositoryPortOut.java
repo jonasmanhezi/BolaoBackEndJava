@@ -9,11 +9,9 @@ public interface RankingRepositoryPortOut {
 
     Ranking save(Ranking ranking);
 
-    Optional<Ranking> findByUserId(Long userId);
+    Optional<Ranking> findByUserIdAndGrupoId(Long userId, Long grupoId);
 
-    List<Ranking> findAllOrdenadoPorPontuacao();
+    List<RankingComNome> findAllOrdenadoComNomeByGrupoId(Long grupoId);
 
-    List<RankingComNome> findAllOrdenadoComNome();
-
-    void deleteByUserIdNotIn(List<Long> userIds);
+    void deleteByGrupoIdAndUserIdNotIn(Long grupoId, List<Long> userIds);
 }

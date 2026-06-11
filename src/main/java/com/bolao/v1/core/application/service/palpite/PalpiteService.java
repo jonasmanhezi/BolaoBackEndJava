@@ -28,19 +28,23 @@ public class PalpiteService implements PalpitePortIn {
     private final PartidaRepositoryPortOut partidaRepositoryPortOut;
     private final ModelMapper modelMapper;
 
-
-
     @Override
-    public Palpite create(Integer userId, PalpiteCreateRequestDto request) {
+    public Palpite create(Integer userId, Long grupoId, PalpiteCreateRequestDto request) {
         Partida partida = partidaRepositoryPortOut.findById(request.getPartidaId())
                 .orElseThrow(() -> new RuntimeException("Partida não encontrada"));
 
-        if (partida.getStatus() != String.valueOf(Partida.StatusPartida.AGENDADA)){
+        if (partida.getStatus() != String.valueOf(Partida.StatusPartida.AGENDADA)) {
             throw new IllegalStateException("Jogo já iniciado ou finalizado.");
+        }
+
+        if (palpiteRepositoryPortOut.existsByPartidaIdAndUsuarioIdAndGrupoId(
+                request.getPartidaId(), userId, grupoId)) {
+            throw new IllegalArgumentException("Você já enviou palpite para esta partida neste grupo.");
         }
 
         Palpite palpite = Palpite.builder()
                 .usuarioId(userId)
+                .grupoId(grupoId)
                 .partidaId(request.getPartidaId())
                 .golsCasa(request.getGolsCasa())
                 .golsVisitante(request.getGolsVisitante())
@@ -49,10 +53,9 @@ public class PalpiteService implements PalpitePortIn {
         return palpiteRepositoryPortOut.save(palpite);
     }
 
-
     @Transactional
     @Override
-    public Palpite atualizarPalpite(Integer palpiteId, Integer userId, PalpiteUpdateRequestDto dto) {
+    public Palpite atualizarPalpite(Integer palpiteId, Integer userId, Long grupoId, PalpiteUpdateRequestDto dto) {
         Palpite palpite = palpiteRepositoryPortOut.findById(palpiteId)
                 .orElseThrow(() -> new RuntimeException("Palpite não encontrado"));
 
@@ -60,19 +63,33 @@ public class PalpiteService implements PalpitePortIn {
             throw new IllegalArgumentException("Acesso negado: Este palpite não pertence a você.");
         }
 
+        if (palpite.getGrupoId() == null || !palpite.getGrupoId().equals(grupoId)) {
+            throw new IllegalArgumentException("Este palpite não pertence ao grupo informado.");
+        }
+
         Partida partida = partidaRepositoryPortOut.findById(palpite.getPartidaId()).orElseThrow();
 
-        palpite.atualizarPalpite(dto.getGolsCasa(), dto.getGolsVisitante(), Partida.StatusPartida.valueOf(partida.getStatus()));
+        palpite.atualizarPalpite(
+                dto.getGolsCasa(),
+                dto.getGolsVisitante(),
+                Partida.StatusPartida.valueOf(partida.getStatus())
+        );
 
         return palpiteRepositoryPortOut.save(palpite);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<Palpite> findByCampeonatoIdFaseId(Integer campeonatoId, Integer faseId, Integer userIdDoToken) {
-        log.info("Buscando palpites do usuário {} para o campeonato {} e fase {}", userIdDoToken, campeonatoId, faseId);
-
-
+    public List<Palpite> findByCampeonatoIdFaseId(
+            Integer campeonatoId,
+            Integer faseId,
+            Integer userIdDoToken,
+            Long grupoId
+    ) {
+        log.info(
+                "Buscando palpites do usuário {} no grupo {} para campeonato {} e fase {}",
+                userIdDoToken, grupoId, campeonatoId, faseId
+        );
 
         List<Partida> partidas = partidaRepositoryPortOut.findByCampeonatoIdAndFaseId(campeonatoId, faseId);
 
@@ -84,7 +101,9 @@ public class PalpiteService implements PalpitePortIn {
                 .map(Partida::getId)
                 .collect(Collectors.toList());
 
-        return palpiteRepositoryPortOut.findByPartidaIdInAndUsuarioId(partidaIds, userIdDoToken);
+        return palpiteRepositoryPortOut.findByPartidaIdInAndUsuarioIdAndGrupoId(
+                partidaIds, userIdDoToken, grupoId
+        );
     }
 
     @Override
@@ -94,6 +113,7 @@ public class PalpiteService implements PalpitePortIn {
             Integer campeonatoId,
             Integer faseId,
             Integer userIdAutenticado,
+            Long grupoId,
             int page,
             int size
     ) {
@@ -102,12 +122,12 @@ public class PalpiteService implements PalpitePortIn {
         }
 
         log.info(
-                "Buscando palpites paginados do usuário {} para campeonato {} e fase {} (page={}, size={})",
-                usuarioId, campeonatoId, faseId, page, size
+                "Buscando palpites paginados do usuário {} no grupo {} para campeonato {} e fase {} (page={}, size={})",
+                usuarioId, grupoId, campeonatoId, faseId, page, size
         );
 
-        Page<Palpite> resultPage = palpiteRepositoryPortOut.findByUsuarioIdAndCampeonatoIdAndFaseIdPaged(
-                usuarioId, campeonatoId, faseId, page, size
+        Page<Palpite> resultPage = palpiteRepositoryPortOut.findByUsuarioIdAndGrupoIdAndCampeonatoIdAndFaseIdPaged(
+                usuarioId, grupoId, campeonatoId, faseId, page, size
         );
 
         List<PalpiteResponseDto> content = resultPage.getContent().stream()
@@ -143,5 +163,4 @@ public class PalpiteService implements PalpitePortIn {
 
         log.info("Pontuação calculada com sucesso para os {} palpites da partida {}.", palpites.size(), partidaId);
     }
-
-    }
+}

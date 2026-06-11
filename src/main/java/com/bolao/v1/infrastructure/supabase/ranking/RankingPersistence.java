@@ -25,20 +25,13 @@ public class RankingPersistence implements RankingRepositoryPortOut {
     }
 
     @Override
-    public Optional<Ranking> findByUserId(Long userId) {
-        return repository.findByUserId(userId).map(this::toDomain);
+    public Optional<Ranking> findByUserIdAndGrupoId(Long userId, Long grupoId) {
+        return repository.findByUserIdAndGrupoId(userId, grupoId).map(this::toDomain);
     }
 
     @Override
-    public List<Ranking> findAllOrdenadoPorPontuacao() {
-        return repository.findAllOrdenadoPorPontuacao().stream()
-                .map(this::toDomain)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<RankingComNome> findAllOrdenadoComNome() {
-        return repository.findAllOrdenadoComNome().stream()
+    public List<RankingComNome> findAllOrdenadoComNomeByGrupoId(Long grupoId) {
+        return repository.findAllOrdenadoComNomeByGrupoId(grupoId).stream()
                 .map(row -> RankingComNome.builder()
                         .userId(row.getUserId())
                         .pontuacao(row.getPontuacao() == null ? null : row.getPontuacao().intValue())
@@ -47,10 +40,25 @@ public class RankingPersistence implements RankingRepositoryPortOut {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public void deleteByGrupoIdAndUserIdNotIn(Long grupoId, List<Long> userIds) {
+        List<RankingEntity> rankings = repository.findByGrupoId(grupoId);
+
+        if (userIds == null || userIds.isEmpty()) {
+            rankings.forEach(entity -> repository.deleteById(entity.getId()));
+            return;
+        }
+
+        rankings.stream()
+                .filter(entity -> entity.getUserId() != null && !userIds.contains(entity.getUserId()))
+                .forEach(entity -> repository.deleteById(entity.getId()));
+    }
+
     private RankingEntity toEntity(Ranking ranking) {
         return RankingEntity.builder()
                 .id(ranking.getId())
                 .userId(ranking.getUserId())
+                .grupoId(ranking.getGrupoId())
                 .createdAt(ranking.getCreatedAt())
                 .pontuacao(ranking.getPontuacao() == null ? null : ranking.getPontuacao().shortValue())
                 .build();
@@ -60,19 +68,9 @@ public class RankingPersistence implements RankingRepositoryPortOut {
         return Ranking.builder()
                 .id(entity.getId())
                 .userId(entity.getUserId())
+                .grupoId(entity.getGrupoId())
                 .createdAt(entity.getCreatedAt())
                 .pontuacao(entity.getPontuacao() == null ? null : entity.getPontuacao().intValue())
                 .build();
-    }
-
-    @Override
-    public void deleteByUserIdNotIn(List<Long> userIds) {
-        if (userIds == null || userIds.isEmpty()) {
-            repository.deleteAll();
-            return;
-        }
-        repository.findAll().stream()
-                .filter(entity -> entity.getUserId() != null && !userIds.contains(entity.getUserId()))
-                .forEach(entity -> repository.deleteById(entity.getId()));
     }
 }

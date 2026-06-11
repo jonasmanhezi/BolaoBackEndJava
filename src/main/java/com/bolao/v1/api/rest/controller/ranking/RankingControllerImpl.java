@@ -16,8 +16,8 @@ public class RankingControllerImpl implements RankingController {
     private final RankingPortIn rankingService;
 
     @Override
-    public ResponseEntity<List<RankingResponseDto>> listar() {
-        return ResponseEntity.ok(rankingService.listarRanking());
+    public ResponseEntity<List<RankingResponseDto>> listar(Long grupoId) {
+        return ResponseEntity.ok(rankingService.listarRanking(grupoId));
     }
 
     @Override

@@ -19,26 +19,36 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
-public class PalpiteControllerImpl implements PalpiteController{
+public class PalpiteControllerImpl implements PalpiteController {
 
     private final PalpitePortIn palpiteService;
     private final ModelMapper modelMapper;
 
     @Override
-    public ResponseEntity<PalpiteResponseDto> create(@AuthenticatedUserId Integer userId, PalpiteCreateRequestDto request) {
-        Palpite palpiteSalvo = palpiteService.create(userId, request);
+    public ResponseEntity<PalpiteResponseDto> create(Integer userId, Long grupoId, PalpiteCreateRequestDto request) {
+        Palpite palpiteSalvo = palpiteService.create(userId, grupoId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(toResponseDto(palpiteSalvo));
     }
 
     @Override
-    public ResponseEntity<PalpiteResponseDto> atualizarPalpite(Integer id, @AuthenticatedUserId Integer userId, PalpiteUpdateRequestDto request) {
-        Palpite palpiteAtualizado = palpiteService.atualizarPalpite(id, userId, request);
+    public ResponseEntity<PalpiteResponseDto> atualizarPalpite(
+            Integer id,
+            Integer userId,
+            Long grupoId,
+            PalpiteUpdateRequestDto request
+    ) {
+        Palpite palpiteAtualizado = palpiteService.atualizarPalpite(id, userId, grupoId, request);
         return ResponseEntity.ok(toResponseDto(palpiteAtualizado));
     }
 
     @Override
-    public ResponseEntity<List<PalpiteResponseDto>> findByCampeonatoIdFaseId(Integer campeonatoId, Integer faseId, @AuthenticatedUserId Integer userId) {
-        List<Palpite> palpites = palpiteService.findByCampeonatoIdFaseId(campeonatoId, faseId, userId);
+    public ResponseEntity<List<PalpiteResponseDto>> findByCampeonatoIdFaseId(
+            Integer campeonatoId,
+            Integer faseId,
+            Integer userId,
+            Long grupoId
+    ) {
+        List<Palpite> palpites = palpiteService.findByCampeonatoIdFaseId(campeonatoId, faseId, userId, grupoId);
 
         List<PalpiteResponseDto> responseList = palpites.stream()
                 .map(this::toResponseDto)
@@ -52,18 +62,19 @@ public class PalpiteControllerImpl implements PalpiteController{
             Integer usuarioId,
             Integer campeonatoId,
             Integer faseId,
-            @AuthenticatedUserId Integer userId,
+            Integer userId,
+            Long grupoId,
             int page,
             int size
     ) {
         PaginatedPalpiteResponseDto response = palpiteService.findByUsuarioIdCampeonatoIdFaseIdPaged(
-                usuarioId, campeonatoId, faseId, userId, page, size
+                usuarioId, campeonatoId, faseId, userId, grupoId, page, size
         );
 
         response.getContent().forEach(dto ->
                 dto.add(WebMvcLinkBuilder.linkTo(
                         WebMvcLinkBuilder.methodOn(PalpiteController.class)
-                                .atualizarPalpite(dto.getId(), dto.getUsuarioId(), null)
+                                .atualizarPalpite(dto.getId(), dto.getUsuarioId(), null, null)
                 ).withSelfRel())
         );
 
@@ -75,9 +86,8 @@ public class PalpiteControllerImpl implements PalpiteController{
 
         dto.add(WebMvcLinkBuilder.linkTo(
                 WebMvcLinkBuilder.methodOn(PalpiteController.class)
-                        .atualizarPalpite(palpite.getId(), palpite.getUsuarioId(), null)).withSelfRel());
+                        .atualizarPalpite(palpite.getId(), palpite.getUsuarioId(), null, null)).withSelfRel());
 
         return dto;
     }
 }
-

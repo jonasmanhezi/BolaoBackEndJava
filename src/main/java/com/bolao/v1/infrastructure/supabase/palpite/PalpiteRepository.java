@@ -13,21 +13,28 @@ import java.util.List;
 @Repository
 public interface PalpiteRepository extends JpaRepository<PalpiteEntity, Integer> {
 
-
     List<PalpiteEntity> findByPartidaId(Integer partidaId);
 
-    List<PalpiteEntity> findByPartidaIdInAndUsuarioId(List<Integer> partidaIds, Integer usuarioId);
+    List<PalpiteEntity> findByPartidaIdInAndUsuarioIdAndGrupoId(
+            List<Integer> partidaIds,
+            Integer usuarioId,
+            Long grupoId
+    );
+
+    boolean existsByPartidaIdAndUsuarioIdAndGrupoId(Integer partidaId, Integer usuarioId, Long grupoId);
 
     @Query("""
             SELECT p FROM PalpiteEntity p, PartidaEntity pt
             WHERE p.partidaId = pt.id
               AND p.usuarioId = :usuarioId
+              AND p.grupoId = :grupoId
               AND pt.campeonatoId = :campeonatoId
               AND pt.faseId = :faseId
             ORDER BY p.id ASC
             """)
-    Page<PalpiteEntity> findByUsuarioIdAndCampeonatoIdAndFaseId(
+    Page<PalpiteEntity> findByUsuarioIdAndGrupoIdAndCampeonatoIdAndFaseId(
             @Param("usuarioId") Integer usuarioId,
+            @Param("grupoId") Long grupoId,
             @Param("campeonatoId") Integer campeonatoId,
             @Param("faseId") Integer faseId,
             Pageable pageable
@@ -38,7 +45,8 @@ public interface PalpiteRepository extends JpaRepository<PalpiteEntity, Integer>
             FROM PalpiteEntity p
             INNER JOIN PartidaEntity pt ON p.partidaId = pt.id
             WHERE pt.status = 'FINALIZADA'
+              AND p.grupoId = :grupoId
             GROUP BY p.usuarioId
             """)
-    List<UsuarioPontuacaoSum> sumPontuacaoPorUsuarioEmPartidasFinalizadas();
+    List<UsuarioPontuacaoSum> sumPontuacaoPorUsuarioEmPartidasFinalizadasPorGrupo(@Param("grupoId") Long grupoId);
 }
