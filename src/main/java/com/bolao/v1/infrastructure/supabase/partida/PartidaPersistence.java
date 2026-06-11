@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -111,7 +111,7 @@ public class PartidaPersistence implements PartidaRepositoryPortOut {
     }
 
     @Override
-    public List<Partida> findPartidasDeHoje(LocalDateTime inicio, LocalDateTime fim) {
+    public List<Partida> findPartidasDeHoje(Instant inicio, Instant fim) {
         return repository.findByDataHoraPartidaBetween(inicio, fim).stream()
                 .map(entity -> mapper.map(entity, Partida.class))
                 .collect(Collectors.toList());

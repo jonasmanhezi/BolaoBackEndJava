@@ -9,6 +9,7 @@ import com.bolao.v1.core.port.in.dto.response.palpite.PaginatedPalpiteResponseDt
 import com.bolao.v1.core.port.in.dto.response.palpite.PalpiteResponseDto;
 import com.bolao.v1.core.port.out.palpite.PalpiteRepositoryPortOut;
 import com.bolao.v1.core.port.out.partida.PartidaRepositoryPortOut;
+import com.bolao.v1.shared.palpite.PalpiteDeadlinePolicy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -33,9 +34,7 @@ public class PalpiteService implements PalpitePortIn {
         Partida partida = partidaRepositoryPortOut.findById(request.getPartidaId())
                 .orElseThrow(() -> new RuntimeException("Partida não encontrada"));
 
-        if (partida.getStatus() != String.valueOf(Partida.StatusPartida.AGENDADA)) {
-            throw new IllegalStateException("Jogo já iniciado ou finalizado.");
-        }
+        PalpiteDeadlinePolicy.validarEnvioPermitido(partida);
 
         if (palpiteRepositoryPortOut.existsByPartidaIdAndUsuarioIdAndGrupoId(
                 request.getPartidaId(), userId, grupoId)) {
@@ -68,6 +67,8 @@ public class PalpiteService implements PalpitePortIn {
         }
 
         Partida partida = partidaRepositoryPortOut.findById(palpite.getPartidaId()).orElseThrow();
+
+        PalpiteDeadlinePolicy.validarEnvioPermitido(partida);
 
         palpite.atualizarPalpite(
                 dto.getGolsCasa(),

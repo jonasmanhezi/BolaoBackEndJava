@@ -8,7 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Entity
 @Table(name = "tb_partida")
@@ -43,7 +43,7 @@ public class PartidaEntity {
     private TimeEntity timeVisitante;
 
     @Column(name= "data_hora_partida", nullable = false)
-    private LocalDateTime dataHoraPartida;
+    private Instant dataHoraPartida;
 
     @Column(name = "gols_casa")
     private Integer golsCasa;

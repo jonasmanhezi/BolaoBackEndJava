@@ -9,6 +9,8 @@ import com.bolao.v1.core.port.in.dto.response.partida.PartidaResponseDto;
 import com.bolao.v1.core.port.in.dto.response.partidaExterna.PartidaExternaDto;
 import com.bolao.v1.core.port.out.partida.PartidaRepositoryPortOut;
 import com.bolao.v1.core.port.out.partidaExterna.PartidaExternaPortOut;
+import com.bolao.v1.shared.fixture.FixtureApiStatusMapper;
+import com.bolao.v1.shared.fixture.FixtureApiStatusMapper.Category;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,10 +18,10 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -89,13 +91,16 @@ public class PartidaService implements PartidaPortIn {
     @Override
     @Transactional
     public void sincronizarPartidasDoDia() {
-        LocalDateTime inicioDoDia = LocalDateTime.now().minusDays(1);
-        LocalDateTime fimDoDia = LocalDateTime.now().plusDays(1);
+        ZoneId brazil = ZoneId.of("America/Sao_Paulo");
+        ZonedDateTime agoraBrasil = ZonedDateTime.now(brazil);
+        Instant inicioDoDia = agoraBrasil.minusDays(1).toInstant();
+        Instant fimDoDia = agoraBrasil.plusDays(1).toInstant();
 
         List<Partida> partidasDeHoje = partidaPortOut.findPartidasDeHoje(inicioDoDia, fimDoDia);
 
         List<Partida> partidasParaAtualizar = partidasDeHoje.stream()
                 .filter(p -> !String.valueOf(Partida.StatusPartida.FINALIZADA).equals(p.getStatus()))
+                .filter(p -> !String.valueOf(Partida.StatusPartida.CANCELADA).equals(p.getStatus()))
                 .toList();
 
         if (partidasParaAtualizar.isEmpty()) {
@@ -112,24 +117,71 @@ public class PartidaService implements PartidaPortIn {
                 PartidaExternaDto dadosExternos = partidaExternaPortOut
                         .buscarDadosPartidaExterna(partida.getExternalId());
 
-                log.info("Partida Local ID {}: Status Local='{}' | Status API='{}'",
-                        partida.getId(), partida.getStatus(), dadosExternos.getStatus());
+                Category apiCategory = FixtureApiStatusMapper.categorize(dadosExternos.getStatusShort());
 
-                if ("IN_PLAY".equals(dadosExternos.getStatus()) &&
-                        String.valueOf(Partida.StatusPartida.AGENDADA).equals(partida.getStatus())){
-                    log.info("Partida ID {} mudou para EM_ANDAMENTO.", partida.getId());
-                }
+                log.info(
+                        "Partida Local ID {}: Status Local='{}' | API='{}' | Categoria='{}'",
+                        partida.getId(),
+                        partida.getStatus(),
+                        dadosExternos.getStatusShort(),
+                        apiCategory
+                );
 
-                if ("FINISHED".equals(dadosExternos.getStatus())) {
-                    partida.finalizarPartida(dadosExternos.getPlacarCasa(), dadosExternos.getPlacarVisitante());
-                    partidaPortOut.save(partida);
-                    log.info("Partida ID {} finalizada com placar: {}x{}",
-                            partida.getId(), dadosExternos.getPlacarCasa(), dadosExternos.getPlacarVisitante());
-                }
+                aplicarDadosExternos(partida, dadosExternos, apiCategory);
 
             } catch (Exception e) {
                 log.error("Falha ao sincronizar dados externos da partida local ID: {}. Erro: {}", partida.getId(), e.getMessage());
             }
+        }
+    }
+
+    private void aplicarDadosExternos(Partida partida, PartidaExternaDto dadosExternos, Category apiCategory) {
+        Integer placarCasa = dadosExternos.getPlacarCasa();
+        Integer placarVisitante = dadosExternos.getPlacarVisitante();
+
+        switch (apiCategory) {
+            case IN_PLAY -> {
+                if (String.valueOf(Partida.StatusPartida.AGENDADA).equals(partida.getStatus())) {
+                    partida.iniciarPartida();
+                    log.info("Partida ID {} mudou para EM_ANDAMENTO (API: {}).", partida.getId(), dadosExternos.getStatusShort());
+                }
+                partida.atualizarPlacarAoVivo(placarCasa, placarVisitante);
+                partidaPortOut.save(partida);
+            }
+            case FINISHED -> {
+                Integer golsCasa = placarCasa != null ? placarCasa : 0;
+                Integer golsVisitante = placarVisitante != null ? placarVisitante : 0;
+                if (placarCasa == null || placarVisitante == null) {
+                    log.warn(
+                            "Partida ID {} finalizada pela API ({}) sem placar completo; usando {}x{}.",
+                            partida.getId(), dadosExternos.getStatusShort(), golsCasa, golsVisitante
+                    );
+                }
+                partida.finalizarPartida(golsCasa, golsVisitante);
+                partidaPortOut.save(partida);
+                log.info("Partida ID {} finalizada com placar: {}x{} (API: {}).",
+                        partida.getId(), golsCasa, golsVisitante, dadosExternos.getStatusShort());
+            }
+            case CANCELLED -> {
+                partida.cancelar();
+                partidaPortOut.save(partida);
+                log.info("Partida ID {} cancelada (API: {}).", partida.getId(), dadosExternos.getStatusShort());
+            }
+            case POSTPONED -> log.info(
+                    "Partida ID {} adiada pela API ({}); mantendo status local '{}'.",
+                    partida.getId(), dadosExternos.getStatusShort(), partida.getStatus()
+            );
+            case SCHEDULED -> {
+                // NS/TBD: no local status change; optional live score refresh if API already published goals
+                if (placarCasa != null || placarVisitante != null) {
+                    partida.atualizarPlacarAoVivo(placarCasa, placarVisitante);
+                    partidaPortOut.save(partida);
+                }
+            }
+            case UNKNOWN -> log.warn(
+                    "Partida ID {} com status API não mapeado: '{}'. Nenhuma alteração aplicada.",
+                    partida.getId(), dadosExternos.getStatusShort()
+            );
         }
     }
 

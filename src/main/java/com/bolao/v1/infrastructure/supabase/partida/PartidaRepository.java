@@ -6,7 +6,7 @@ import com.bolao.v1.infrastructure.model.PartidaEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 @Repository
@@ -15,7 +15,7 @@ public interface PartidaRepository extends JpaRepository<PartidaEntity, Integer>
 
     List<PartidaEntity> findByStatus(Partida.StatusPartida status);
 
-    List<PartidaEntity> findByDataHoraPartidaBetween(LocalDateTime inicio, LocalDateTime fim);
+    List<PartidaEntity> findByDataHoraPartidaBetween(Instant inicio, Instant fim);
 
     @org.springframework.data.jpa.repository.Query("SELECT p FROM PartidaEntity p LEFT JOIN FETCH p.timeCasa LEFT JOIN FETCH p.timeVisitante")
     List<PartidaEntity> findAllWithTimes();

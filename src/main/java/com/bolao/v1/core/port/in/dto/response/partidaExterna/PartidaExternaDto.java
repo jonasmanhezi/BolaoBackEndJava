@@ -16,6 +16,9 @@ public class PartidaExternaDto {
 
 
     private Integer id;
+    /** Raw short status from API-Football (e.g. 1H, FT, PST). */
+    private String statusShort;
+    /** Normalized category label (IN_PLAY, FINISHED, NS, etc.). */
     private String status;
 
     @JsonProperty("score")

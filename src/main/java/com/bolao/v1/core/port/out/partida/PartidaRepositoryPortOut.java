@@ -4,7 +4,7 @@ package com.bolao.v1.core.port.out.partida;
 import com.bolao.v1.core.domain.entity.partida.Partida;
 
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,5 +27,5 @@ public interface PartidaRepositoryPortOut {
 
     List<Partida> findByStatus(Partida.StatusPartida status);
 
-    List<Partida> findPartidasDeHoje(LocalDateTime inicio, LocalDateTime fim);
+    List<Partida> findPartidasDeHoje(Instant inicio, Instant fim);
 }

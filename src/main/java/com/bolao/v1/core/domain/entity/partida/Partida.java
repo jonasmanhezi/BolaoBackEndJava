@@ -7,8 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
+import java.time.Instant;
 
 @Data
 @Builder
@@ -20,7 +19,7 @@ public class Partida {
     private Integer campeonatoId;
     private Integer timeCasaId;
     private Integer timeVisitanteId;
-    private LocalDateTime dataHoraPartida;
+    private Instant dataHoraPartida;
 
     private String nomeCasa;
     private String nomeVisitante;
@@ -37,15 +36,27 @@ public class Partida {
         AGENDADA, EM_ANDAMENTO, FINALIZADA , CANCELADA
     }
 
-    public void iniciarPartida () {
-
-        if(this.status != String.valueOf(StatusPartida.AGENDADA ) || this.status == String.valueOf(StatusPartida.FINALIZADA)) {
-            throw new IllegalStateException("Você não pode iniciar uma partida que não esteja agendada ou finalizada!");
+    public void iniciarPartida() {
+        if (String.valueOf(StatusPartida.FINALIZADA).equals(this.status)
+                || String.valueOf(StatusPartida.CANCELADA).equals(this.status)) {
+            throw new IllegalStateException("Você não pode iniciar uma partida finalizada ou cancelada.");
         }
 
         this.status = String.valueOf(StatusPartida.EM_ANDAMENTO);
+    }
 
+    public void atualizarPlacarAoVivo(Integer golsCasa, Integer golsVisitante) {
+        if (String.valueOf(StatusPartida.FINALIZADA).equals(this.status)
+                || String.valueOf(StatusPartida.CANCELADA).equals(this.status)) {
+            return;
+        }
 
+        if (golsCasa != null) {
+            this.golsCasa = golsCasa;
+        }
+        if (golsVisitante != null) {
+            this.golsVisitante = golsVisitante;
+        }
     }
 
     private Integer externalId;

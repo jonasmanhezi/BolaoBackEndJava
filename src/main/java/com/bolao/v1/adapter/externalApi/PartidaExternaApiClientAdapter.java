@@ -2,6 +2,7 @@ package com.bolao.v1.adapter.externalApi;
 
 import com.bolao.v1.core.port.in.dto.response.partidaExterna.PartidaExternaDto;
 import com.bolao.v1.core.port.out.partidaExterna.PartidaExternaPortOut;
+import com.bolao.v1.shared.fixture.FixtureApiStatusMapper;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,7 +43,7 @@ public class PartidaExternaApiClientAdapter implements PartidaExternaPortOut {
                 ? item.fixture().status().shortStatus()
                 : null;
 
-        String normalizedStatus = normalizeStatus(rawShort);
+        String normalizedStatus = FixtureApiStatusMapper.toNormalizedLabel(rawShort);
 
         Integer home = null;
         Integer away = null;
@@ -73,21 +74,10 @@ public class PartidaExternaApiClientAdapter implements PartidaExternaPortOut {
 
         return PartidaExternaDto.builder()
                 .id(item.fixture() != null ? item.fixture().id() : externalId)
+                .statusShort(rawShort)
                 .status(normalizedStatus)
                 .score(score)
                 .build();
-    }
-
-    private String normalizeStatus(String shortStatus) {
-        if (shortStatus == null) {
-            return "NS";
-        }
-        return switch (shortStatus) {
-            case "FT", "AET", "PEN" -> "FINISHED";
-            case "1H", "2H", "HT", "ET", "BT", "LIVE", "P" -> "IN_PLAY";
-            case "NS", "TBD" -> "NS";
-            default -> shortStatus;
-        };
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
