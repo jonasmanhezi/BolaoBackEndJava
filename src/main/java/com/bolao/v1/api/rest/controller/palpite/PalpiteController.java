@@ -57,7 +57,7 @@ public interface PalpiteController {
     @Operation(summary = "Lista palpites paginados do usuário no grupo (campeonato/fase na URL são ignorados)")
     @ApiResponse(responseCode = "200", description = "Página de palpites retornada com sucesso")
     @ApiResponse(responseCode = "401", description = "Token JWT ausente ou inválido")
-    @ApiResponse(responseCode = "403", description = "usuarioId da URL deve ser igual ao userId retornado no login")
+    @ApiResponse(responseCode = "403", description = "usuarioId deve ser você ou outro membro do mesmo grupo")
     @GetMapping("/usuario/{usuarioId}/campeonato/{campeonatoId}/fase/{faseId}")
     ResponseEntity<PaginatedPalpiteResponseDto> findByUsuarioIdCampeonatoIdFaseIdPaged(
             @PathVariable Integer usuarioId,

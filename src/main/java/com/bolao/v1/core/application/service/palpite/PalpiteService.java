@@ -7,6 +7,7 @@ import com.bolao.v1.core.port.in.dto.request.palpite.PalpiteCreateRequestDto;
 import com.bolao.v1.core.port.in.dto.request.palpite.PalpiteUpdateRequestDto;
 import com.bolao.v1.core.port.in.dto.response.palpite.PaginatedPalpiteResponseDto;
 import com.bolao.v1.core.port.in.dto.response.palpite.PalpiteResponseDto;
+import com.bolao.v1.core.port.out.grupo.GrupoRepositoryPortOut;
 import com.bolao.v1.core.port.out.palpite.PalpiteRepositoryPortOut;
 import com.bolao.v1.core.port.out.partida.PartidaRepositoryPortOut;
 import com.bolao.v1.shared.palpite.PalpiteDeadlinePolicy;
@@ -27,6 +28,7 @@ public class PalpiteService implements PalpitePortIn {
 
     private final PalpiteRepositoryPortOut palpiteRepositoryPortOut;
     private final PartidaRepositoryPortOut partidaRepositoryPortOut;
+    private final GrupoRepositoryPortOut grupoRepositoryPortOut;
     private final ModelMapper modelMapper;
 
     @Override
@@ -106,8 +108,11 @@ public class PalpiteService implements PalpitePortIn {
             int page,
             int size
     ) {
-        if (!usuarioId.equals(userIdAutenticado)) {
-            throw new IllegalArgumentException("Acesso negado: você só pode consultar seus próprios palpites.");
+        if (!usuarioId.equals(userIdAutenticado)
+                && !grupoRepositoryPortOut.isMembro(grupoId, usuarioId.longValue())) {
+            throw new IllegalArgumentException(
+                    "Acesso negado: você só pode consultar palpites de membros do seu grupo."
+            );
         }
 
         log.info(
