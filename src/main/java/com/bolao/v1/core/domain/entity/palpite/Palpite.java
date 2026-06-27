@@ -35,24 +35,34 @@ public class Palpite {
         return this.usuarioId.equals(idDoUsuarioLogado);
     }
 
-    public void pontuarPalpite(Integer resultadoGolsCasa, Integer resultadoGolsVisitante) {
+    public void pontuarPalpite(Integer resultadoGolsCasa, Integer resultadoGolsVisitante, Integer faseId) {
 
         if (this.status == StatusPalpite.PONTUADO) {
             return;
         }
 
-        if(this.golsCasa .equals(resultadoGolsCasa) && this.golsVisitante.equals(resultadoGolsVisitante)){
-                this.pontuacaoObtida = 25;
-                this.status = StatusPalpite.PONTUADO;
-                return;
+        int pontosExato;
+        int pontosTendencia;
+
+        if (faseId != null && faseId == 2) {
+            pontosExato = 50;
+            pontosTendencia = 20;
+        } else {
+            pontosExato = 25;
+            pontosTendencia = 10;
+        }
+
+        if (this.golsCasa.equals(resultadoGolsCasa) && this.golsVisitante.equals(resultadoGolsVisitante)) {
+            this.pontuacaoObtida = pontosExato;
+            this.status = StatusPalpite.PONTUADO;
+            return;
         }
 
         Integer tendenciaPalpite = Integer.compare(this.golsCasa, this.golsVisitante);
         Integer tendenciaResultado = Integer.compare(resultadoGolsCasa, resultadoGolsVisitante);
 
-
         if (tendenciaPalpite == tendenciaResultado) {
-            this.pontuacaoObtida = 10;
+            this.pontuacaoObtida = pontosTendencia;
             this.status = StatusPalpite.PONTUADO;
             return;
         }

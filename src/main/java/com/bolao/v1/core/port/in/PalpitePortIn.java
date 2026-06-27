@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface PalpitePortIn {
 
-    void pontuarPalpite(Integer partidaId, Integer golsCasaReal, Integer golsVisitanteReal);
+    void pontuarPalpite(Integer partidaId, Integer golsCasaReal, Integer golsVisitanteReal, Integer faseId);
 
     Palpite create(Integer userId, Long grupoId, PalpiteCreateRequestDto request);
 

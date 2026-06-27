@@ -33,9 +33,11 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/auth/**",
                     "/v1/partidas/**",
+                    "/v1/times/**",
                     "/images/**",
                     "/docs/**",
                     "/swagger-ui/**",
+                    "/v3/api-docs",
                     "/v3/api-docs/**"
                 ).permitAll()
                 .anyRequest().authenticated()

@@ -41,7 +41,8 @@ public class PontuacaoPalpitesJob {
                 palpiteService.pontuarPalpite(
                         partida.getId(),
                         partida.getGolsCasa(),
-                        partida.getGolsVisitante()
+                        partida.getGolsVisitante(),
+                        partida.getFaseId()
                 );
 
             } catch (Exception e) {

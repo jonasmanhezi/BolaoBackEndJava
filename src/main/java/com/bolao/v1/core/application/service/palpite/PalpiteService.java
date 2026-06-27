@@ -139,9 +139,9 @@ public class PalpiteService implements PalpitePortIn {
 
     @Override
     @Transactional
-    public void pontuarPalpite(Integer partidaId, Integer golsCasaReal, Integer golsVisitanteReal) {
-        log.info("Iniciando o motor de pontos para a partida ID: {}. Placar Oficial: {} x {}",
-                partidaId, golsCasaReal, golsVisitanteReal);
+    public void pontuarPalpite(Integer partidaId, Integer golsCasaReal, Integer golsVisitanteReal, Integer faseId) {
+        log.info("Iniciando o motor de pontos para a partida ID: {}. Placar Oficial: {} x {}. Fase ID: {}",
+                partidaId, golsCasaReal, golsVisitanteReal, faseId);
 
         List<Palpite> palpites = palpiteRepositoryPortOut.findByPartidaId(partidaId);
 
@@ -151,7 +151,7 @@ public class PalpiteService implements PalpitePortIn {
         }
 
         for (Palpite palpite : palpites) {
-            palpite.pontuarPalpite(golsCasaReal, golsVisitanteReal);
+            palpite.pontuarPalpite(golsCasaReal, golsVisitanteReal, faseId);
             palpiteRepositoryPortOut.save(palpite);
         }
 
