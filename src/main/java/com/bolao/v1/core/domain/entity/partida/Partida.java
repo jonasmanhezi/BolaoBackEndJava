@@ -76,8 +76,12 @@ public class Partida {
     }
 
     private Integer externalId;
+    private boolean temPenalti;
+    private Integer winnerId;
+    private Integer penaltiCasa;
+    private Integer penaltiVisitante;
 
-    public void finalizarPartida(Integer golsCasa, Integer golsVisitante ) {
+    public void finalizarPartida(Integer golsCasa, Integer golsVisitante) {
 
         if(this.status == String.valueOf(StatusPartida.FINALIZADA) || this.status == String.valueOf(StatusPartida.CANCELADA)) {
             throw new IllegalStateException("Você não pode finalizar uma partida que já foi finalizada ou cancelada");

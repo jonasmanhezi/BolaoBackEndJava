@@ -126,11 +126,33 @@ public class PartidaExternaApiClientAdapter implements PartidaExternaPortOut {
                     .build();
         }
 
+        Integer penaltiCasa = null;
+        Integer penaltiVisitante = null;
+        boolean temPenalti = false;
+        if (item.score() != null && item.score().penalty() != null) {
+            penaltiCasa = item.score().penalty().home();
+            penaltiVisitante = item.score().penalty().away();
+            temPenalti = penaltiCasa != null && penaltiVisitante != null;
+        }
+
+        String winnerLado = null;
+        if (item.teams() != null) {
+            if (item.teams().home() != null && Boolean.TRUE.equals(item.teams().home().winner())) {
+                winnerLado = "HOME";
+            } else if (item.teams().away() != null && Boolean.TRUE.equals(item.teams().away().winner())) {
+                winnerLado = "AWAY";
+            }
+        }
+
         return PartidaExternaDto.builder()
                 .id(item.fixture() != null ? item.fixture().id() : externalId)
                 .statusShort(rawShort)
                 .status(normalizedStatus)
                 .score(score)
+                .temPenalti(temPenalti)
+                .winnerLado(winnerLado)
+                .penaltiCasa(penaltiCasa)
+                .penaltiVisitante(penaltiVisitante)
                 .build();
     }
 
@@ -155,7 +177,7 @@ public class PartidaExternaApiClientAdapter implements PartidaExternaPortOut {
     private record ApiFixturesResponse(List<FixtureItem> response) {}
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    private record FixtureItem(Fixture fixture, Goals goals, Score score) {}
+    private record FixtureItem(Fixture fixture, Goals goals, Score score, Teams teams) {}
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     private record Fixture(Integer id, Status status) {}
@@ -171,8 +193,14 @@ public class PartidaExternaApiClientAdapter implements PartidaExternaPortOut {
     private record Goals(Integer home, Integer away) {}
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    private record Score(@JsonProperty("fulltime") FullTime fulltime) {}
+    private record Score(@JsonProperty("fulltime") FullTime fulltime, FullTime penalty) {}
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     private record FullTime(Integer home, Integer away) {}
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private record Teams(TeamInfo home, TeamInfo away) {}
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private record TeamInfo(Integer id, Boolean winner) {}
 }

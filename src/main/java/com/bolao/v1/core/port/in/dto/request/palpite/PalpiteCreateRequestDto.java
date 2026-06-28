@@ -20,6 +20,7 @@ public class PalpiteCreateRequestDto {
     private Integer campeonatoId;
     private Integer golsCasa;
     private Integer golsVisitante;
+    private Integer palpiteWinnerId;
     private LocalDateTime dataRegistro;
 
 }

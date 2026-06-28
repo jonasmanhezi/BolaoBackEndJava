@@ -58,4 +58,16 @@ public class PartidaEntity {
     @Column(name = "external_id")
     private Integer externalId;
 
+    @Column(name = "tem_penalti", nullable = false)
+    private boolean temPenalti;
+
+    @Column(name = "winner_id")
+    private Integer winnerId;
+
+    @Column(name = "penalti_casa")
+    private Integer penaltiCasa;
+
+    @Column(name = "penalti_visitante")
+    private Integer penaltiVisitante;
+
 }

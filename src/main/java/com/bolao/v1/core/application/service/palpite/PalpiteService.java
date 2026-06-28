@@ -49,6 +49,7 @@ public class PalpiteService implements PalpitePortIn {
                 .partidaId(request.getPartidaId())
                 .golsCasa(request.getGolsCasa())
                 .golsVisitante(request.getGolsVisitante())
+                .palpiteWinnerId(request.getPalpiteWinnerId())
                 .build();
 
         return palpiteRepositoryPortOut.save(palpite);
@@ -75,6 +76,7 @@ public class PalpiteService implements PalpitePortIn {
         palpite.atualizarPalpite(
                 dto.getGolsCasa(),
                 dto.getGolsVisitante(),
+                dto.getPalpiteWinnerId(),
                 Partida.StatusPartida.valueOf(partida.getStatus())
         );
 
@@ -140,8 +142,11 @@ public class PalpiteService implements PalpitePortIn {
     @Override
     @Transactional
     public void pontuarPalpite(Integer partidaId, Integer golsCasaReal, Integer golsVisitanteReal, Integer faseId) {
-        log.info("Iniciando o motor de pontos para a partida ID: {}. Placar Oficial: {} x {}. Fase ID: {}",
-                partidaId, golsCasaReal, golsVisitanteReal, faseId);
+        Partida partida = partidaRepositoryPortOut.findById(partidaId)
+                .orElseThrow(() -> new RuntimeException("Partida não encontrada: " + partidaId));
+
+        log.info("Iniciando o motor de pontos para a partida ID: {}. Placar Oficial: {} x {}. Fase ID: {}. Pênalti: {}",
+                partidaId, golsCasaReal, golsVisitanteReal, faseId, partida.isTemPenalti());
 
         List<Palpite> palpites = palpiteRepositoryPortOut.findByPartidaId(partidaId);
 
@@ -151,7 +156,8 @@ public class PalpiteService implements PalpitePortIn {
         }
 
         for (Palpite palpite : palpites) {
-            palpite.pontuarPalpite(golsCasaReal, golsVisitanteReal, faseId);
+            palpite.pontuarPalpite(golsCasaReal, golsVisitanteReal, faseId,
+                    partida.isTemPenalti(), partida.getWinnerId());
             palpiteRepositoryPortOut.save(palpite);
         }
 

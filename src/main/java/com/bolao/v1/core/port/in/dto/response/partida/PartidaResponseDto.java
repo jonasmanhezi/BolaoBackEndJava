@@ -33,5 +33,9 @@ public class PartidaResponseDto extends RepresentationModel<PartidaResponseDto> 
     private String logoCasa;
     private String logoFora;
 
+    private boolean temPenalti;
+    private Integer winnerId;
+    private Integer penaltiCasa;
+    private Integer penaltiVisitante;
 
 }

@@ -86,6 +86,10 @@ public class PartidaPersistence implements PartidaRepositoryPortOut {
         partida.setGolsVisitante(entity.getGolsVisitante());
         partida.setStatus(entity.getStatus() != null ? entity.getStatus().name() : null);
         partida.setExternalId(entity.getExternalId());
+        partida.setTemPenalti(entity.isTemPenalti());
+        partida.setWinnerId(entity.getWinnerId());
+        partida.setPenaltiCasa(entity.getPenaltiCasa());
+        partida.setPenaltiVisitante(entity.getPenaltiVisitante());
         return partida;
     }
 

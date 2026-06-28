@@ -151,6 +151,11 @@ public class PartidaService implements PartidaPortIn {
         }
     }
 
+    private Integer resolverWinnerId(Partida partida, String winnerLado) {
+        if (winnerLado == null) return null;
+        return "HOME".equals(winnerLado) ? partida.getTimeCasaId() : partida.getTimeVisitanteId();
+    }
+
     private void aguardarEntreRequisicoesApi() {
         if (footballApiRequestDelayMs <= 0) {
             return;
@@ -187,9 +192,18 @@ public class PartidaService implements PartidaPortIn {
                     );
                 }
                 partida.finalizarPartida(golsCasa, golsVisitante);
+                partida.setTemPenalti(dadosExternos.isTemPenalti());
+                partida.setPenaltiCasa(dadosExternos.getPenaltiCasa());
+                partida.setPenaltiVisitante(dadosExternos.getPenaltiVisitante());
+
+                Integer winnerId = resolverWinnerId(partida, dadosExternos.getWinnerLado());
+                partida.setWinnerId(winnerId);
+
                 partidaPortOut.save(partida);
-                log.info("Partida ID {} finalizada com placar: {}x{} (API: {}).",
-                        partida.getId(), golsCasa, golsVisitante, dadosExternos.getStatusShort());
+                log.info("Partida ID {} finalizada com placar: {}x{} | pênalti={} | winner_id={} (API: {}).",
+                        partida.getId(), golsCasa, golsVisitante,
+                        dadosExternos.isTemPenalti(), winnerId,
+                        dadosExternos.getStatusShort());
             }
             case CANCELLED -> {
                 partida.cancelar();

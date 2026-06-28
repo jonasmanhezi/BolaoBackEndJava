@@ -24,6 +24,12 @@ public class PartidaExternaDto {
     @JsonProperty("score")
     private Score score;
 
+    private boolean temPenalti;
+    /** HOME ou AWAY — lado que venceu nos pênaltis, resolvido pelo service para o id interno do time. */
+    private String winnerLado;
+    private Integer penaltiCasa;
+    private Integer penaltiVisitante;
+
     public Integer getPlacarCasa() {
         return (score != null && score.getFullTime () != null) ?
                 score.getFullTime().getHome() : null;

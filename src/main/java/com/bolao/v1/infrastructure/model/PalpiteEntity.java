@@ -38,6 +38,9 @@ public class PalpiteEntity {
     @Column(name = "pontuacao_obtida")
     private Integer pontuacaoObtida;
 
+    @Column(name = "palpite_winner_id")
+    private Integer palpiteWinnerId;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private Palpite.StatusPalpite status;

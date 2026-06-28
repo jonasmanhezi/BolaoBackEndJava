@@ -17,4 +17,5 @@ public class PalpiteUpdateRequestDto {
     private Integer id;
     private Integer golsCasa;
     private Integer golsVisitante;
+    private Integer palpiteWinnerId;
 }
