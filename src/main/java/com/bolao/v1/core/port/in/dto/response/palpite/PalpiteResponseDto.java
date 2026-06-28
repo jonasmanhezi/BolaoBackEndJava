@@ -23,6 +23,7 @@ public class PalpiteResponseDto extends RepresentationModel<PalpiteResponseDto> 
     private Integer golsCasa;
     private Integer golsVisitante;
     private Integer pontuacaoObtida;
+    private Integer palpiteWinnerId;
     private LocalDateTime dataRegistro;
 
 
