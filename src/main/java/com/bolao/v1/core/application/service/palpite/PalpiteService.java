@@ -50,6 +50,7 @@ public class PalpiteService implements PalpitePortIn {
                 .golsCasa(request.getGolsCasa())
                 .golsVisitante(request.getGolsVisitante())
                 .palpiteWinnerId(request.getPalpiteWinnerId())
+                .faseId(partida.getFaseId())
                 .build();
 
         return palpiteRepositoryPortOut.save(palpite);

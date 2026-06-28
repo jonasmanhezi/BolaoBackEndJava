@@ -1,0 +1,2 @@
+ALTER TABLE tb_palpite
+    ADD COLUMN IF NOT EXISTS fase_id INTEGER;

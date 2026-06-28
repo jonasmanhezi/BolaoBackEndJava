@@ -29,6 +29,9 @@ public class PalpiteEntity {
     @Column(name = "grupo_id")
     private Long grupoId;
 
+    @Column(name = "fase_id")
+    private Integer faseId;
+
     @Column(name = "gols_casa", nullable = false)
     private Integer golsCasa;
 

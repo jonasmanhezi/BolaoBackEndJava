@@ -22,6 +22,7 @@ public class Palpite {
     private Integer golsVisitante;
     private Integer pontuacaoObtida;
     private Integer palpiteWinnerId;
+    private Integer faseId;
     private LocalDateTime dataRegistro;
 
     private StatusPalpite status = StatusPalpite.PENDENTE;
