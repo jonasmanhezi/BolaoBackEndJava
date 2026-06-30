@@ -13,7 +13,7 @@ public class RankingJob {
 
     private final RankingPortIn rankingService;
 
-    @Scheduled(fixedDelay = 300000, initialDelay = 60000)
+    @Scheduled(fixedDelay = 480000, initialDelay = 60000)
     public void atualizarRanking() {
         log.info("--- [JOB] Iniciando atualização do ranking ---");
         try {

@@ -13,7 +13,7 @@ public class SincronizacaoPartidasJob {
 
     private final PartidaPortIn partidaService;
 
-    @Scheduled(fixedDelay = 900000)
+    @Scheduled(fixedDelay = 300000)
     public void executarSincronizacaoGols() {
         log.info("--- [JOB REST] Iniciando sincronização de gols com a API externa ---");
 
