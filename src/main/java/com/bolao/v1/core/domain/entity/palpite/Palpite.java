@@ -50,7 +50,13 @@ public class Palpite {
         int pontosExato;
         int pontosTendencia;
 
-        if (faseId != null && faseId > 1) {
+        if (faseId != null && faseId == 7) {
+            pontosExato = 100;
+            pontosTendencia = 50;
+        } else if (faseId != null && faseId == 6) {
+            pontosExato = 80;
+            pontosTendencia = 40;
+        } else if (faseId != null && faseId > 1) {
             pontosExato = 50;
             pontosTendencia = 20;
         } else {
